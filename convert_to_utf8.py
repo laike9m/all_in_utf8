@@ -6,9 +6,10 @@ use:
 will automatically list all modified files' name on the screen 
 '''
 
-import sys
 import os
+import sys
 import chardet
+from shutil import copy
 
 
 class BaseInfo:
@@ -25,19 +26,45 @@ class Convert(BaseInfo):
 
     def __init__(self, top_dir):
         self.top_dir = top_dir
-        if not os.path.exists('copy'):
-            os.mkdir('copy')
-            
+        self.filelist = {}
+
     def get_file_list(self):
         for root, _, files in os.walk(self.top_dir):
             for file in files:
                 if any(file.endswith(t) for t in self.file_type):
-                    file = open(os.path.join(root, file), 'rb')
-                    encoding = chardet.detect(file.read())['encoding']
-                    if encoding:
-                        print(os.path.split(file.name)[1] + ': ' + encoding)
-                    else:
-                        print(os.path.split(file.name)[1] + ' is none')
+                    filename = os.path.join(root, file)
+                    with open(filename, 'rb') as file:
+                        encoding = chardet.detect(file.read())['encoding']
+                        if encoding and encoding.lower() != 'utf-8':
+                            self.filelist[filename] = encoding  # {filename:encoding}
+                            print(os.path.split(file.name)[1] + ': ' + encoding)
+    
+    
+    def make_copy(self):
+        'copy those files that need to be modified'
+        os.chdir(self.top_dir)
+        if not os.path.exists('../copy'):
+            os.mkdir('../copy')
+        os.chdir('../copy')
+        
+        for file in self.filelist.keys(): 
+            filename = os.path.split(file)[1]
+            if os.path.exists(filename):
+                os.remove(filename)
+            try:
+                copy(file, '.')
+            except IOError:
+                print('you may not have permission to write')
+    
+    
+    def re_encoding(self):
+        for file, encoding in self.filelist.items():
+            with open(file, 'rt', encoding=encoding) as f:
+                content = f.read()
+            os.remove(file)
+            with open(file, 'wt', encoding='utf-8') as new_f:
+                new_f.write(content)
+    
 
     def print_instance(self):
         print(str(self.__dict__))
@@ -46,6 +73,12 @@ class Convert(BaseInfo):
         print(dir(self))
 
 if __name__ == '__main__':
-    #top_dir = sys.argv[1]
-    t = Convert(r'C:\ZY\EverythingandNothing\Python\MyWork\Test_Py3.3')
+    try:
+        print(sys.argv)
+        top_dir = sys.argv[1]
+        t = Convert(top_dir)
+    except IndexError:
+        t = Convert(r'C:\ZY\EverythingandNothing\Python\MyWork\Test_Py3.3\src')
     t.get_file_list()
+    t.make_copy()
+    t.re_encoding()
