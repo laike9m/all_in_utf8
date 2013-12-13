@@ -1,5 +1,5 @@
 '''
-recursively find and convert gbk py, txt files to utf-8
+recursively find and convert non-utf8 .py, .txt, .cpp, .c files to utf-8
 use:
     python convert_to_utf8.py top_directory
 
