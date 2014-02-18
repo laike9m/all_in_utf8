@@ -1,10 +1,10 @@
-'''
+"""
 recursively find and convert non-utf8 .py, .txt, .cpp, .c files to utf-8
 use:
     python convert_to_utf8.py top_directory
 
 will automatically list all modified files' name on the screen 
-'''
+"""
 
 import os
 import sys
@@ -21,9 +21,7 @@ class BaseInfo:
         
 
 class Convert(BaseInfo):
-    
-    'copy original files to ./copy folder'
-
+    """copy original files to ./copy folder"""
     def __init__(self, top_dir):
         self.top_dir = top_dir
         self.filelist = {}
@@ -41,7 +39,7 @@ class Convert(BaseInfo):
     
     
     def make_copy(self):
-        'copy those files that need to be modified'
+        """copy those files that need to be modified"""
         os.chdir(self.top_dir)
         if not os.path.exists('../copy'):
             os.mkdir('../copy')
@@ -69,16 +67,17 @@ class Convert(BaseInfo):
     def print_instance(self):
         print(str(self.__dict__))
 
+
     def print_all_attr(self):
         print(dir(self))
 
+
 if __name__ == '__main__':
     try:
-        print(sys.argv)
         top_dir = sys.argv[1]
         t = Convert(top_dir)
     except IndexError:
-        t = Convert(r'C:\ZY\EverythingandNothing\Python\MyWork\Test_Py3.3\src')
+        t = Convert('.')
     t.get_file_list()
     t.make_copy()
     t.re_encoding()
