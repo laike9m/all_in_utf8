@@ -8,9 +8,11 @@ will automatically list all modified files' name on the screen
 
 import os
 import sys
-import chardet
-from shutil import copy
 import codecs
+from shutil import copy
+from os.path import abspath
+
+import chardet
 
 
 class BaseInfo:
@@ -18,7 +20,7 @@ class BaseInfo:
     file_type = ('.txt', '.py', '.cpp', '.c')
 
     def __init__(self, top_dir):
-        self.top_dir = top_dir
+        self.top_dir = abspath(top_dir)
 
 
 class Convert(BaseInfo):
