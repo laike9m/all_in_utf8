@@ -3,22 +3,23 @@ recursively find and convert non-utf8 .py, .txt, .cpp, .c files to utf-8
 use:
     python convert_to_utf8.py top_directory
 
-will automatically list all modified files' name on the screen 
+will automatically list all modified files' name on the screen
 """
 
 import os
 import sys
 import chardet
 from shutil import copy
+import codecs
 
 
 class BaseInfo:
-    
+
     file_type = ('.txt', '.py', '.cpp', '.c')
-    
+
     def __init__(self, top_dir):
         self.top_dir = top_dir
-        
+
 
 class Convert(BaseInfo):
     """copy original files to ./copy folder"""
@@ -36,16 +37,16 @@ class Convert(BaseInfo):
                         if encoding and encoding.lower() != 'utf-8':
                             self.filelist[filename] = encoding  # {filename:encoding}
                             print(os.path.split(file.name)[1] + ': ' + encoding)
-    
-    
+
+
     def make_copy(self):
         """copy those files that need to be modified"""
         os.chdir(self.top_dir)
         if not os.path.exists('../copy'):
             os.mkdir('../copy')
         os.chdir('../copy')
-        
-        for file in self.filelist.keys(): 
+
+        for file in self.filelist.keys():
             filename = os.path.split(file)[1]
             if os.path.exists(filename):
                 os.remove(filename)
@@ -53,16 +54,20 @@ class Convert(BaseInfo):
                 copy(file, '.')
             except IOError:
                 print('you may not have permission to write')
-    
-    
+
+
     def re_encoding(self):
         for file, encoding in self.filelist.items():
-            with open(file, 'rt', encoding=encoding) as f:
-                content = f.read()
-            os.remove(file)
-            with open(file, 'wt', encoding='utf-8') as new_f:
-                new_f.write(content)
-    
+            try:
+                with codecs.open(file, 'rt', encoding=encoding) as f:
+                    content = f.read()
+            except UnicodeDecodeError:
+                print("UnicideDecodeError: " + encoding + file)
+            else:
+                os.remove(file)
+                with codecs.open(file, 'wt', encoding='utf-8') as new_f:
+                    new_f.write(content)
+
 
     def print_instance(self):
         print(str(self.__dict__))
